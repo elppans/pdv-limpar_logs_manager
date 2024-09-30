@@ -1,0 +1,29 @@
+#!/bin/bash
+# limpar_logs_manager
+
+# Copiar comando para /usr/bin e dar perissão de execução
+# Adicionar em /etc/crontab:
+#
+# Limpar diretório de LOGs do Manager
+# 00 22	*  *  * root /usr/bin/script.sh # Executar todo dia as 22 Hs 00 Min
+
+numero_dias="3"
+tamanho_arquivos="1GB"
+
+# Diretório base
+diretorio_base="/web/manager/Logs"
+
+# Encontre e remova diretórios com mais de N dias
+#find "$diretorio_base" -type d -ctime +"$numero_dias" -exec rm -r {} \;
+find "$diretorio_base" -maxdepth 1 -type d -mtime +"$numero_dias"  -exec rm -rf {} \;
+
+# Encontra subdiretórios com tamanho igual ou superior a 1 GB
+subdiretorios=$(du -sh -t "$tamanho_arquivos" "$diretorio_base"/* |  | awk '{print $2}')
+
+# Remove cada subdiretório encontrado
+for subdir in $subdiretorios; do
+    echo "Removendo $subdir"
+    rm -r "$subdir"
+done
+
+# echo "Concluído!"
